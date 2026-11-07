@@ -18,4 +18,5 @@ def console(request):
         "menu": MENU,
         "servidor_nome": settings.CONSOLE_SERVIDOR_NOME,
         "servidor_ip": settings.CONSOLE_SERVIDOR_IP,
+        "intervalo_metricas": settings.CONSOLE_INTERVALO_METRICAS_S,
     }

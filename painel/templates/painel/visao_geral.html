@@ -1,7 +1,77 @@
 {% extends "painel/base.html" %}
+{% load static %}
 {% block titulo %}Visão geral{% endblock %}
 {% block conteudo %}
-<h1 class="h3">Visão geral do servidor</h1>
-<p class="text-muted">Métricas, estados dos serviços e gráficos serão adicionados na Etapa 3.</p>
-<div class="alert alert-info" role="status">🚧 Em desenvolvimento</div>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">Visão geral do servidor</h1>
+    <div id="status-coleta" class="small text-muted" role="status" aria-live="polite">⏳ Aguardando a primeira coleta…</div>
+  </div>
+  <button id="btn-atualizar" class="btn btn-outline-secondary btn-sm ms-auto" type="button">⟳ Atualizar agora</button>
+</div>
+
+<div id="aviso-desatualizado" class="alert alert-warning d-none" role="alert"></div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+    <div class="card-titulo">CPU</div>
+    <div class="valor" id="v-cpu">—</div>
+    <div class="progress mt-2" style="height:6px" role="progressbar" aria-label="Uso de CPU"><div class="progress-bar" id="b-cpu" style="width:0%"></div></div>
+    <div class="small text-muted mt-1">média de todos os núcleos (janela de 0,5 s)</div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+    <div class="card-titulo">Memória (usada / total)</div>
+    <div class="valor" id="v-mem">—</div>
+    <div class="progress mt-2" style="height:6px" role="progressbar" aria-label="Uso de memória"><div class="progress-bar bg-success" id="b-mem" style="width:0%"></div></div>
+    <div class="small text-muted mt-1" id="d-mem"></div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+    <div class="card-titulo">Disco</div>
+    <div class="valor" id="v-disco">—</div>
+    <div class="progress mt-2" style="height:6px" role="progressbar" aria-label="Uso de disco"><div class="progress-bar bg-info" id="b-disco" style="width:0%"></div></div>
+    <div class="small text-muted mt-1" id="d-disco"></div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+    <div class="card-titulo">Uptime</div>
+    <div class="valor" id="v-up">—</div>
+    <div class="small text-muted mt-1" id="d-up"></div>
+  </div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-8"><div class="card h-100"><div class="card-body">
+    <h2 class="h6">CPU e memória (%) <small class="text-muted">— amostras reais desta sessão</small></h2>
+    <div class="grafico"><canvas id="g-recursos" aria-label="Gráfico de CPU e memória"></canvas></div>
+  </div></div></div>
+  <div class="col-lg-4"><div class="card h-100"><div class="card-body">
+    <h2 class="h6">Latência HTTP</h2>
+    <div class="valor" id="v-http">—</div>
+    <div class="small text-muted" id="d-http"></div>
+    <div class="grafico"><canvas id="g-http" aria-label="Gráfico de latência HTTP"></canvas></div>
+  </div></div></div>
+</div>
+
+<div class="card mb-3"><div class="card-body">
+  <h2 class="h6">Estado dos serviços</h2>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Serviço</th><th>Estado (systemd)</th><th>Porta</th><th>Teste de porta</th></tr></thead>
+      <tbody id="t-servicos"><tr><td colspan="4" class="text-muted">Aguardando dados…</td></tr></tbody>
+    </table>
+  </div>
+</div></div>
+
+<div id="toasts" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'painel/vendor/chart.umd.min.js' %}"></script>
+<script>
+  const CONFIG = {
+    url: "{% url 'api_metricas' %}",
+    loginUrl: "{% url 'login' %}",
+    intervalo: {{ intervalo_metricas }}
+  };
+</script>
+<script src="{% static 'painel/visao_geral.js' %}"></script>
 {% endblock %}
