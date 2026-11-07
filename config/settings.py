@@ -148,3 +148,12 @@ CONSOLE_SERVIDOR_IP = os.environ.get("CONSOLE_SERVIDOR_IP", "192.168.100.10")
 CONSOLE_SITE_URL = os.environ.get("CONSOLE_SITE_URL", "http://site.empresa.test/")
 CONSOLE_DISCOS = ["/", "/srv/portal/arquivos"]
 CONSOLE_INTERVALO_METRICAS_S = 5   # intervalo de atualização do painel (segundos)
+
+# --- FTP (vsftpd da N1) ---
+CONSOLE_FTP_HOST = CONSOLE_SERVIDOR_IP          # vsftpd escuta só em 192.168.100.10
+CONSOLE_FTP_USUARIO = os.environ.get("CONSOLE_FTP_USUARIO", "ftpuser")
+CONSOLE_FTP_SENHA = os.environ.get("CONSOLE_FTP_SENHA", "")
+CONSOLE_FTP_DIR = "/arquivos"                   # dentro do chroot /srv/portal
+CONSOLE_FTP_EXTENSOES = {".pdf", ".txt", ".png", ".jpg", ".jpeg"}
+CONSOLE_FTP_MAX_MB = 10
+CONSOLE_SITE_ARQUIVOS_URL = os.environ.get("CONSOLE_SITE_ARQUIVOS_URL", "http://site.empresa.test/arquivos/")
