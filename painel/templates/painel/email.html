@@ -1,0 +1,84 @@
+{% extends "painel/base.html" %}
+{% block titulo %}E-mail{% endblock %}
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+  <h1 class="h3 mb-0">E-mail</h1>
+  {% if conta %}
+  <form method="get" class="d-flex align-items-center gap-2 ms-md-3">
+    <label for="sel-conta" class="small text-muted">Conta</label>
+    <select id="sel-conta" name="conta" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for c in contas %}<option value="{{ c.pk }}" {% if c.pk == conta.pk %}selected{% endif %}>{{ c.endereco }}</option>{% endfor %}
+    </select>
+    <input type="hidden" name="pasta" value="{{ pasta }}">
+  </form>
+  {% endif %}
+  {% if pode_enviar and conta %}
+    <a class="btn btn-success btn-sm ms-auto" href="{% url 'email_nova' %}?conta={{ conta.pk }}">✉ Nova mensagem</a>
+  {% endif %}
+</div>
+<p class="text-muted small">Envio por SMTP (Postfix, porta 25) e consulta por IMAP (Dovecot, porta 143) em {{ servidor_ip }}. As mensagens ficam guardadas no servidor.</p>
+
+{% if erro %}<div class="alert alert-danger" role="alert">✖ {{ erro }}</div>{% endif %}
+
+{% for p in pendentes %}
+<div class="alert alert-warning d-flex flex-wrap align-items-center gap-2" role="alert">
+  <div>⚠ A mensagem <strong>{{ p.assunto }}</strong> para {{ p.para }} <strong>já foi enviada</strong>, mas a cópia em Enviados não foi salva.</div>
+  <form method="post" action="{% url 'email_salvar_copia' %}" class="ms-auto m-0">
+    {% csrf_token %}<input type="hidden" name="id" value="{{ p.id }}">
+    <button class="btn btn-sm btn-warning" type="submit">Salvar cópia em Enviados (sem reenviar)</button>
+  </form>
+</div>
+{% endfor %}
+
+{% if conta %}
+<ul class="nav nav-tabs mb-3">
+  {% for chave, rotulo in pastas %}
+  <li class="nav-item">
+    <a class="nav-link {% if chave == pasta %}active{% endif %}" {% if chave == pasta %}aria-current="page"{% endif %}
+       href="?conta={{ conta.pk }}&pasta={{ chave }}">{% if chave == "INBOX" %}📥{% else %}📤{% endif %} {{ rotulo }}</a>
+  </li>
+  {% endfor %}
+  <li class="nav-item ms-auto"><a class="nav-link" href="?conta={{ conta.pk }}&pasta={{ pasta }}">⟳ Atualizar</a></li>
+</ul>
+
+<div class="row g-3">
+  <div class="{% if aberta %}col-lg-5{% else %}col-12{% endif %}">
+    <div class="card">
+      <div class="list-group list-group-flush" style="max-height:520px; overflow:auto">
+      {% for m in mensagens %}
+        <a class="list-group-item list-group-item-action {% if aberta and aberta.uid == m.uid %}active{% endif %}"
+           href="?conta={{ conta.pk }}&pasta={{ pasta }}&uid={{ m.uid }}">
+          <div class="d-flex justify-content-between gap-2">
+            <span class="text-truncate {% if not m.lida %}fw-bold{% endif %}">{% if not m.lida %}● {% endif %}{{ m.assunto }}</span>
+            <small class="text-nowrap">{{ m.data|slice:":25" }}</small>
+          </div>
+          <small>{% if pasta == "INBOX" %}De: {{ m.de }}{% else %}Para: {{ m.para }}{% endif %}</small>
+        </a>
+      {% empty %}
+        <div class="list-group-item text-muted">Nenhuma mensagem nesta pasta.</div>
+      {% endfor %}
+      </div>
+    </div>
+    <div class="small text-muted mt-1">● = não lida · mostrando as 30 mais recentes</div>
+  </div>
+
+  {% if aberta %}
+  <div class="col-lg-7">
+    <div class="card"><div class="card-body">
+      <h2 class="h5">{{ aberta.assunto }}</h2>
+      <dl class="row small mb-2">
+        <dt class="col-3 col-md-2">De</dt><dd class="col-9 col-md-10">{{ aberta.de }}</dd>
+        <dt class="col-3 col-md-2">Para</dt><dd class="col-9 col-md-10">{{ aberta.para }}</dd>
+        <dt class="col-3 col-md-2">Data</dt><dd class="col-9 col-md-10">{{ aberta.data }}</dd>
+        <dt class="col-3 col-md-2">ID</dt><dd class="col-9 col-md-10"><code class="small text-break">{{ aberta.message_id }}</code></dd>
+      </dl>
+      <pre class="border rounded p-3 bg-light" style="white-space:pre-wrap; font-family:inherit">{{ aberta.corpo }}</pre>
+      {% if pode_enviar and pasta == "INBOX" %}
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'email_nova' %}?conta={{ conta.pk }}&responder={{ aberta.uid }}">↩ Responder</a>
+      {% endif %}
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

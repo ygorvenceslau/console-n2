@@ -1,0 +1,58 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Nova mensagem{% endblock %}
+{% block conteudo %}
+<h1 class="h3">{% if dados.em_resposta_a %}↩ Responder mensagem{% else %}✉ Nova mensagem{% endif %}</h1>
+{% if erros.geral %}<div class="alert alert-danger" role="alert">✖ {{ erros.geral }}</div>{% endif %}
+
+<div class="card"><div class="card-body">
+<form method="post" novalidate id="form-email">
+  {% csrf_token %}
+  <input type="hidden" name="conta" value="{{ conta.pk }}">
+  <input type="hidden" name="em_resposta_a" value="{{ dados.em_resposta_a }}">
+  <input type="hidden" name="referencias" value="{{ dados.referencias }}">
+
+  <div class="mb-3">
+    <label class="form-label" for="de">De</label>
+    <input id="de" class="form-control" value="{{ conta.endereco }}" readonly aria-describedby="ajuda-de">
+    <div id="ajuda-de" class="form-text">O remetente é sempre a conta selecionada.</div>
+  </div>
+
+  <div class="mb-3">
+    <label for="para" class="form-label">Para</label>
+    <input type="email" id="para" name="para" class="form-control {% if erros.para %}is-invalid{% endif %}"
+           value="{{ dados.para }}" placeholder="suporte@empresa.test" required aria-describedby="erro-para">
+    {% if erros.para %}<div id="erro-para" class="invalid-feedback">{{ erros.para }}</div>{% endif %}
+  </div>
+
+  <div class="mb-3">
+    <label for="assunto" class="form-label">Assunto</label>
+    <input type="text" id="assunto" name="assunto" maxlength="150" class="form-control {% if erros.assunto %}is-invalid{% endif %}"
+           value="{{ dados.assunto }}" required aria-describedby="erro-assunto">
+    {% if erros.assunto %}<div id="erro-assunto" class="invalid-feedback">{{ erros.assunto }}</div>{% endif %}
+  </div>
+
+  <div class="mb-3">
+    <label for="corpo" class="form-label">Mensagem</label>
+    <textarea id="corpo" name="corpo" rows="10" maxlength="10000" class="form-control {% if erros.corpo %}is-invalid{% endif %}"
+              required aria-describedby="erro-corpo">{{ dados.corpo }}</textarea>
+    {% if erros.corpo %}<div id="erro-corpo" class="invalid-feedback">{{ erros.corpo }}</div>{% endif %}
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-success" type="submit" id="btn-enviar">➤ Enviar por SMTP</button>
+    <a class="btn btn-outline-secondary" href="{% url 'email' %}?conta={{ conta.pk }}">Cancelar</a>
+  </div>
+  <div id="enviando" class="small text-muted mt-2 d-none" role="status">⏳ Enviando por SMTP e salvando a cópia em Enviados…</div>
+</form>
+</div></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Desabilita o botão após o clique para evitar envio duplicado.
+  document.getElementById("form-email").addEventListener("submit", function () {
+    document.getElementById("btn-enviar").disabled = true;
+    document.getElementById("enviando").classList.remove("d-none");
+  });
+</script>
+{% endblock %}

@@ -18,7 +18,6 @@ def _em_construcao(nome, titulo, etapa):
 
 
 servicos = _em_construcao("servicos", "Serviços", 3)
-email = _em_construcao("email", "E-mail", 5)
 ssh = _em_construcao("ssh", "Acesso SSH", 6)
 logs = _em_construcao("logs", "Logs técnicos", 7)
 
@@ -124,3 +123,168 @@ def arquivos_verificar(request):
                         "concluída" if v["integro"] else "falha",
                         "hashes FTP e HTTP coincidem" if v["integro"] else "hashes divergentes ou HTTP indisponível")
     return JsonResponse({"ok": True, **v})
+
+
+# ---------- Etapa 5: e-mail (SMTP + IMAP) ----------
+import base64
+from email import policy as email_policy
+from email.utils import parseaddr
+
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse
+
+from .integracoes import correio
+from .models import ContaCorreio
+from .permissoes import ADMIN
+
+
+def _contas_permitidas(user):
+    if perfil_do_usuario(user) == ADMIN:
+        return ContaCorreio.objects.all()
+    return user.contas_correio.all()
+
+
+def _conta_selecionada(request, conta_id):
+    """Só devolve contas autorizadas ao usuário. Outra conta = 403 (verificação no backend)."""
+    contas = _contas_permitidas(request.user)
+    if conta_id in (None, ""):
+        return contas.first()
+    if not str(conta_id).isdigit():
+        raise PermissionDenied
+    try:
+        return contas.get(pk=int(conta_id))
+    except ContaCorreio.DoesNotExist:
+        raise PermissionDenied
+
+
+def _url_email(conta, pasta="INBOX"):
+    return f"{reverse('email')}?conta={conta.pk}&pasta={pasta}"
+
+
+@perfil_requerido(*TODOS)
+def email(request):
+    conta = _conta_selecionada(request, request.GET.get("conta"))
+    pasta = request.GET.get("pasta", "INBOX")
+    if pasta not in settings.CONSOLE_EMAIL_PASTAS:
+        pasta = "INBOX"
+    pode_enviar = perfil_do_usuario(request.user) in ESCRITA
+    ctx = {"pagina": "email", "contas": _contas_permitidas(request.user), "conta": conta,
+           "pasta": pasta, "pastas": settings.CONSOLE_EMAIL_PASTAS.items(),
+           "pode_enviar": pode_enviar, "mensagens": [], "aberta": None, "erro": None, "pendentes": []}
+    if conta is None:
+        ctx["erro"] = "Nenhuma conta de correio está autorizada para o seu usuário."
+        return render(request, "painel/email.html", ctx)
+    ctx["pendentes"] = [
+        {"id": chave, "assunto": p["assunto"], "para": p["para"]}
+        for chave, p in request.session.get("copias_pendentes", {}).items() if p["conta_id"] == conta.pk
+    ]
+    try:
+        ctx["mensagens"] = correio.listar(conta, pasta)
+        uid = request.GET.get("uid")
+        if uid:
+            ctx["aberta"] = correio.ler(conta, pasta, uid, marcar_lida=pode_enviar)
+            operacoes.registrar(request, "IMAP", f"Leitura em {conta.endereco} ({pasta})", "concluída",
+                                ctx["aberta"]["assunto"])
+    except correio.ErroCorreio as e:
+        ctx["erro"] = str(e)
+        operacoes.registrar(request, "IMAP", f"Consulta a {conta.endereco} ({pasta})", "falha", e)
+    return render(request, "painel/email.html", ctx)
+
+
+@perfil_requerido(*ESCRITA)
+def email_nova(request):
+    conta = _conta_selecionada(request, request.GET.get("conta") or request.POST.get("conta"))
+    if conta is None:
+        raise PermissionDenied
+    dados = {"para": "", "assunto": "", "corpo": "", "em_resposta_a": "", "referencias": ""}
+    erros = {}
+
+    if request.method == "POST":
+        for campo in dados:
+            dados[campo] = request.POST.get(campo, "")
+        try:
+            correio.validar_destinatario(dados["para"])
+        except correio.ErroCorreio as e:
+            erros["para"] = str(e)
+        try:
+            correio.validar_texto(dados["assunto"], "x")
+        except correio.ErroCorreio as e:
+            erros["assunto"] = str(e)
+        try:
+            correio.validar_texto("x", dados["corpo"])
+        except correio.ErroCorreio as e:
+            erros["corpo"] = str(e)
+        for campo in ("em_resposta_a", "referencias"):
+            if "\r" in dados[campo] or "\n" in dados[campo] or len(dados[campo]) > 1000:
+                erros["geral"] = "Dados da resposta inválidos."
+
+        if not erros:
+            msg = correio.montar(conta, dados["para"], dados["assunto"], dados["corpo"],
+                                 dados["em_resposta_a"].strip(), dados["referencias"].strip())
+            descricao = f"Envio de {conta.endereco} para {msg['To']}: {msg['Subject']}"
+            # 1) SMTP
+            try:
+                resposta_smtp = correio.enviar_smtp(conta, msg)
+            except correio.ErroCorreio as e:
+                operacoes.registrar(request, "SMTP", descricao, "falha", e)
+                erros["geral"] = f"Mensagem NÃO enviada. {e}"
+            else:
+                operacoes.registrar(request, "SMTP", descricao, "concluída", resposta_smtp)
+                bruto = msg.as_bytes(policy=email_policy.SMTP)
+                # 2) Cópia em Enviados (IMAP APPEND). Se falhar, NÃO reenvia.
+                try:
+                    resposta_imap = correio.salvar_enviados(conta, bruto)
+                except correio.ErroCorreio as e:
+                    pendentes = request.session.get("copias_pendentes", {})
+                    pendentes[str(msg["Message-ID"])] = {
+                        "conta_id": conta.pk, "assunto": str(msg["Subject"]), "para": str(msg["To"]),
+                        "bruto": base64.b64encode(bruto).decode()}
+                    request.session["copias_pendentes"] = pendentes
+                    operacoes.registrar(request, "IMAP", "Cópia em Enviados", "falha", e)
+                    messages.warning(request, f"✔ Mensagem ENVIADA (SMTP: {resposta_smtp}), mas a cópia em "
+                                              f"Enviados falhou: {e} Não reenvie: use o botão abaixo.")
+                    return redirect(_url_email(conta))
+                operacoes.registrar(request, "IMAP", "Cópia em Enviados", "concluída", resposta_imap)
+                messages.success(request, f"✔ Mensagem enviada (SMTP: {resposta_smtp}) e cópia salva em Enviados.")
+                return redirect(_url_email(conta, settings.CONSOLE_EMAIL_PASTA_ENVIADOS))
+    else:
+        uid = request.GET.get("responder")
+        if uid:
+            try:
+                original = correio.ler(conta, "INBOX", uid, marcar_lida=True)
+            except correio.ErroCorreio as e:
+                messages.error(request, str(e))
+                return redirect(_url_email(conta))
+            assunto = original["assunto"]
+            dados["para"] = parseaddr(original["de"])[1]
+            dados["assunto"] = assunto if assunto.lower().startswith("re:") else "Re: " + assunto
+            citacao = "\n".join("> " + linha for linha in original["corpo"].splitlines())
+            dados["corpo"] = f"\n\nEm {original['data']}, {original['de']} escreveu:\n{citacao}"
+            dados["em_resposta_a"] = original["message_id"]
+            dados["referencias"] = original["references"]
+
+    return render(request, "painel/email_nova.html",
+                  {"pagina": "email", "conta": conta, "dados": dados, "erros": erros})
+
+
+@require_POST
+@perfil_requerido(*ESCRITA)
+def email_salvar_copia(request):
+    """Tenta de novo SOMENTE a gravação em Enviados. A mensagem não é reenviada."""
+    pendentes = request.session.get("copias_pendentes", {})
+    chave = request.POST.get("id", "")
+    item = pendentes.get(chave)
+    if not item:
+        messages.error(request, "Cópia pendente não encontrada.")
+        return redirect("email")
+    conta = _conta_selecionada(request, str(item["conta_id"]))
+    try:
+        resposta = correio.salvar_enviados(conta, base64.b64decode(item["bruto"]))
+    except correio.ErroCorreio as e:
+        messages.error(request, f"A cópia ainda não pôde ser salva: {e} A mensagem já foi enviada; não reenvie.")
+        return redirect(_url_email(conta))
+    del pendentes[chave]
+    request.session["copias_pendentes"] = pendentes
+    operacoes.registrar(request, "IMAP", "Cópia em Enviados (nova tentativa)", "concluída", resposta)
+    messages.success(request, "✔ Cópia salva em Enviados. A mensagem não foi reenviada.")
+    return redirect(_url_email(conta, settings.CONSOLE_EMAIL_PASTA_ENVIADOS))

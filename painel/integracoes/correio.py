@@ -119,13 +119,13 @@ def listar(conta, pasta, limite=30):
     return mensagens
 
 
-def ler(conta, pasta, uid):
+def ler(conta, pasta, uid, marcar_lida=True):
     pasta = _pasta_valida(pasta)
     if not str(uid).isdigit():
         raise ErroCorreio("Mensagem inválida.")
     try:
         with imap(conta) as M:
-            M.select(pasta)                       # leitura marca como lida
+            M.select(pasta, readonly=not marcar_lida)   # leitor apenas consulta
             tipo, dados = M.uid("FETCH", str(uid), "(RFC822)")
     except ErroCorreio:
         raise
