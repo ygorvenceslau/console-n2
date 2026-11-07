@@ -1,0 +1,71 @@
+{% extends "painel/base.html" %}
+{% load static %}
+{% block titulo %}Arquivos (FTP){% endblock %}
+{% block conteudo %}
+<h1 class="h3">Arquivos (FTP)</h1>
+<p class="text-muted">Transferências pelo vsftpd em {{ servidor_ip }} (pasta <code>/arquivos</code>), publicadas em
+  <a href="{{ url_site }}" target="_blank" rel="noopener">{{ url_site }}</a>.</p>
+
+{% if erro %}<div class="alert alert-danger" role="alert">✖ {{ erro }}</div>{% endif %}
+
+<div class="card mb-3"><div class="card-body">
+  <h2 class="h6">Enviar arquivo</h2>
+  {% if pode_enviar %}
+  <form id="form-envio" method="post" action="{% url 'arquivos_enviar' %}" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <label for="arquivo" class="form-label">Arquivo</label>
+    <input type="file" class="form-control" id="arquivo" name="arquivo" accept="{{ extensoes_accept }}"
+           required aria-describedby="ajuda-arquivo erro-arquivo">
+    <div id="ajuda-arquivo" class="form-text">Permitidos: {{ extensoes }} · até {{ max_mb }} MB · nome sem espaços, acentos ou barras.</div>
+    <div id="erro-arquivo" class="invalid-feedback"></div>
+    <button class="btn btn-success mt-3" type="submit" id="btn-enviar">⬆ Enviar via FTP</button>
+  </form>
+  <div id="progresso" class="mt-3 d-none">
+    <div class="small mb-1" id="progresso-texto" role="status" aria-live="polite"></div>
+    <div class="progress" role="progressbar" aria-label="Progresso do envio">
+      <div class="progress-bar progress-bar-striped" id="progresso-barra" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="resultado" class="mt-3"></div>
+  {% else %}
+  <div class="alert alert-secondary mb-0" role="note">🔒 Seu perfil ({{ perfil }}) permite apenas listar, baixar e verificar arquivos.</div>
+  {% endif %}
+</div></div>
+
+<div class="card"><div class="card-body">
+  <div class="d-flex align-items-center mb-2">
+    <h2 class="h6 mb-0">Arquivos no servidor</h2>
+    <a class="btn btn-sm btn-outline-secondary ms-auto" href="{% url 'arquivos' %}">⟳ Atualizar lista</a>
+  </div>
+  <div class="table-responsive" style="max-height:420px; overflow:auto">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Nome</th><th>Tamanho</th><th>Modificado</th><th>Ações</th></tr></thead>
+      <tbody>
+      {% for a in arquivos %}
+        <tr>
+          <td>{{ a.nome }}</td>
+          <td>{{ a.tamanho|filesizeformat }}</td>
+          <td class="small">{{ a.modificado }}</td>
+          <td class="text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'arquivos_baixar' %}?nome={{ a.nome|urlencode }}">⬇ Baixar (FTP)</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ a.url_http }}" target="_blank" rel="noopener">🌐 Ver no site</a>
+            <button class="btn btn-sm btn-outline-success btn-verificar" type="button" data-nome="{{ a.nome }}">✔ Verificar integridade</button>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="text-muted">{% if erro %}Lista indisponível.{% else %}Nenhum arquivo na pasta.{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="resultado-verificacao" class="mt-3"></div>
+</div></div>
+
+<div id="toasts" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+{{ extensoes_lista|json_script:"extensoes" }}
+{% endblock %}
+
+{% block scripts %}
+<script>const ARQ = { verificar: "{% url 'arquivos_verificar' %}", maxMb: {{ max_mb }} };</script>
+<script src="{% static 'painel/arquivos.js' %}"></script>
+{% endblock %}

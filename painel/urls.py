@@ -15,4 +15,7 @@ urlpatterns = [
     path("ssh/", views.ssh, name="ssh"),
     path("logs/", views.logs, name="logs"),
     path("api/metricas/", views.api_metricas, name="api_metricas"),
+    path("arquivos/enviar/", views.arquivos_enviar, name="arquivos_enviar"),
+    path("arquivos/baixar/", views.arquivos_baixar, name="arquivos_baixar"),
+    path("arquivos/verificar/", views.arquivos_verificar, name="arquivos_verificar"),
 ]
