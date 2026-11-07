@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "painel.context.console",
             ],
         },
     },
@@ -131,3 +132,15 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# --- Console N2 ---
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "visao_geral"
+LOGOUT_REDIRECT_URL = "login"
+
+SESSION_COOKIE_AGE = 30 * 60          # sessão expira após 30 min sem uso
+SESSION_SAVE_EVERY_REQUEST = True     # cada clique renova o prazo
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+CONSOLE_SERVIDOR_NOME = "Debian"
+CONSOLE_SERVIDOR_IP = os.environ.get("CONSOLE_SERVIDOR_IP", "192.168.100.10")

@@ -1,0 +1,47 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Console{% endblock %} · Console N2</title>
+  <link rel="stylesheet" href="{% static 'painel/vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'painel/console.css' %}">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Menu principal">
+    <div class="marca">Console de Serviços<small>IFCE · Redes II · N2</small></div>
+    {% for nome, rotulo in menu %}
+      <a href="{% url nome %}" class="{% if pagina == nome %}ativo{% endif %}"
+         {% if pagina == nome %}aria-current="page"{% endif %}>{{ rotulo }}</a>
+    {% endfor %}
+    <div class="sep">Previsto</div>
+    <span class="desativado">Auditoria (Parte 2)</span>
+    <span class="desativado">Novos serviços (Parte 2)</span>
+  </nav>
+
+  <div class="conteudo">
+    <header class="topo">
+      <button class="btn btn-sm btn-outline-secondary d-md-none" type="button"
+              onclick="document.getElementById('sidebar').classList.toggle('aberto')">☰ Menu</button>
+      <strong>Console integrado de serviços</strong>
+      <span class="ms-auto servidor">🖥 {{ servidor_nome }} · {{ servidor_ip }}</span>
+      <span>👤 {{ user.username }} <small class="text-muted">({{ perfil|default:"sem perfil" }})</small></span>
+      <form method="post" action="{% url 'sair' %}" class="m-0">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-outline-danger" type="submit">Sair</button>
+      </form>
+    </header>
+
+    <main class="p-3 p-md-4">
+      {% for m in messages %}
+        <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %}" role="alert">{{ m }}</div>
+      {% endfor %}
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script src="{% static 'painel/vendor/bootstrap.bundle.min.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

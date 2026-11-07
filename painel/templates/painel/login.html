@@ -1,0 +1,35 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Console N2</title>
+  <link rel="stylesheet" href="{% static 'painel/vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'painel/console.css' %}">
+</head>
+<body>
+<div class="login-fundo">
+  <main class="login-caixa">
+    <h1 class="h4 mb-1">Console integrado de serviços</h1>
+    <p class="text-muted mb-4">IFCE · Redes II · N2</p>
+
+    {% if form.errors %}
+      <div class="alert alert-danger" role="alert">⚠ Usuário ou senha inválidos.</div>
+    {% elif next %}
+      <div class="alert alert-warning" role="alert">⏱ Sua sessão expirou ou esta página exige login. Entre novamente.</div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <label for="id_username" class="form-label">Usuário</label>
+      <input type="text" name="username" id="id_username" class="form-control"
+             required autofocus value="{{ form.username.value|default:'' }}">
+      <label for="id_password" class="form-label mt-3">Senha</label>
+      <input type="password" name="password" id="id_password" class="form-control" required>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-success w-100 mt-4" type="submit">Entrar</button>
+    </form>
+  </main>
+</div>
+</body>
+</html>

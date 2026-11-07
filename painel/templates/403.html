@@ -1,0 +1,7 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Acesso negado{% endblock %}
+{% block conteudo %}
+<h1 class="h3">⛔ Acesso negado (403)</h1>
+<p>Seu perfil não tem permissão para esta operação.</p>
+<a class="btn btn-outline-secondary" href="{% url 'visao_geral' %}">Voltar</a>
+{% endblock %}
