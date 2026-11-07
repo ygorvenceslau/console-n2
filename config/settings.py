@@ -157,3 +157,9 @@ CONSOLE_FTP_DIR = "/arquivos"                   # dentro do chroot /srv/portal
 CONSOLE_FTP_EXTENSOES = {".pdf", ".txt", ".png", ".jpg", ".jpeg"}
 CONSOLE_FTP_MAX_MB = 10
 CONSOLE_SITE_ARQUIVOS_URL = os.environ.get("CONSOLE_SITE_ARQUIVOS_URL", "http://site.empresa.test/arquivos/")
+
+# --- E-mail (Postfix + Dovecot da N1) ---
+CONSOLE_EMAIL_HOST = CONSOLE_SERVIDOR_IP        # SMTP 25 e IMAP 143
+CONSOLE_EMAIL_DOMINIO = "empresa.test"
+CONSOLE_EMAIL_PASTAS = {"INBOX": "Recebidas", "Sent": "Enviados"}
+CONSOLE_EMAIL_PASTA_ENVIADOS = "Sent"
