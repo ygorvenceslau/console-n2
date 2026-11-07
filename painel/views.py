@@ -18,7 +18,6 @@ def _em_construcao(nome, titulo, etapa):
 
 
 servicos = _em_construcao("servicos", "Serviços", 3)
-ssh = _em_construcao("ssh", "Acesso SSH", 6)
 logs = _em_construcao("logs", "Logs técnicos", 7)
 
 
@@ -288,3 +287,87 @@ def email_salvar_copia(request):
     operacoes.registrar(request, "IMAP", "Cópia em Enviados (nova tentativa)", "concluída", resposta)
     messages.success(request, "✔ Cópia salva em Enviados. A mensagem não foi reenviada.")
     return redirect(_url_email(conta, settings.CONSOLE_EMAIL_PASTA_ENVIADOS))
+
+
+# ---------- Etapa 6: SSH e hostname reversível ----------
+from django.utils import timezone as dj_timezone
+
+from .integracoes import ssh as ssh_int
+from .models import EstadoHostname
+
+
+@perfil_requerido(*TODOS)
+def ssh(request):
+    ctx = {"pagina": "ssh", "info": None, "erro": None, "estado": EstadoHostname.atual(),
+           "pode_alterar": perfil_do_usuario(request.user) == ADMIN,
+           "nome_digitado": "", "erro_nome": None}
+    try:
+        ctx["info"] = ssh_int.consultar()
+        operacoes.registrar(request, "SSH", "Consulta ao servidor", "concluída",
+                            f"{ctx['info']['usuario_remoto']}@{ctx['info']['hostname']}")
+    except ssh_int.ErroSSH as e:
+        ctx["erro"] = str(e)
+        operacoes.registrar(request, "SSH", "Consulta ao servidor", "falha", e)
+    return render(request, "painel/ssh.html", ctx)
+
+
+@require_POST
+@perfil_requerido(ADMIN)
+def ssh_alterar(request):
+    estado = EstadoHostname.atual()
+    nome = request.POST.get("novo_nome", "").strip()
+    try:
+        ssh_int.validar_nome(nome)
+    except ssh_int.ErroSSH as e:
+        ctx = {"pagina": "ssh", "info": None, "erro": None, "estado": estado, "pode_alterar": True,
+               "nome_digitado": nome, "erro_nome": str(e)}
+        try:
+            ctx["info"] = ssh_int.consultar()
+        except ssh_int.ErroSSH as e2:
+            ctx["erro"] = str(e2)
+        return render(request, "painel/ssh.html", ctx)
+    try:
+        r = ssh_int.definir_hostname(nome)
+    except ssh_int.ErroSSH as e:
+        operacoes.registrar(request, "SSH", f"Alterar hostname para {nome}", "falha", e)
+        messages.error(request, f"✖ {e}")
+        return redirect("ssh")
+    if not estado.original:                  # guarda o original só na primeira alteração
+        estado.original = r["anterior"]
+    estado.valor_teste = r["atual"]
+    estado.alterado_por = request.user
+    estado.alterado_em = dj_timezone.now()
+    estado.save()
+    situacao = "concluída" if r["confirmado"] else "falha"
+    operacoes.registrar(request, "SSH", f"Hostname {r['anterior']} → {r['atual']}", situacao,
+                        f"original registrado: {estado.original}")
+    if r["confirmado"]:
+        messages.success(request, f"✔ Hostname alterado de '{r['anterior']}' para '{r['atual']}' "
+                                  f"(confirmado no servidor). Valor original guardado: '{estado.original}'.")
+    else:
+        messages.error(request, f"✖ O servidor informou '{r['atual']}', diferente do solicitado.")
+    return redirect("ssh")
+
+
+@require_POST
+@perfil_requerido(ADMIN)
+def ssh_restaurar(request):
+    estado = EstadoHostname.atual()
+    if not estado.original:
+        messages.warning(request, "Não há alteração pendente para restaurar.")
+        return redirect("ssh")
+    try:
+        r = ssh_int.definir_hostname(estado.original)
+    except ssh_int.ErroSSH as e:
+        operacoes.registrar(request, "SSH", f"Restaurar hostname para {estado.original}", "falha", e)
+        messages.error(request, f"✖ {e} O valor original continua guardado: '{estado.original}'.")
+        return redirect("ssh")
+    if r["confirmado"]:
+        operacoes.registrar(request, "SSH", f"Hostname restaurado: {r['anterior']} → {r['atual']}", "concluída")
+        messages.success(request, f"✔ Hostname restaurado para '{r['atual']}' (confirmado no servidor).")
+        estado.original = ""
+        estado.valor_teste = ""
+        estado.save()
+    else:
+        messages.error(request, f"✖ O servidor informou '{r['atual']}'. O original continua guardado.")
+    return redirect("ssh")

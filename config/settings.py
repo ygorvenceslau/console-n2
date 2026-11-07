@@ -163,3 +163,9 @@ CONSOLE_EMAIL_HOST = CONSOLE_SERVIDOR_IP        # SMTP 25 e IMAP 143
 CONSOLE_EMAIL_DOMINIO = "empresa.test"
 CONSOLE_EMAIL_PASTAS = {"INBOX": "Recebidas", "Sent": "Enviados"}
 CONSOLE_EMAIL_PASTA_ENVIADOS = "Sent"
+
+# --- SSH (OpenSSH da N1) ---
+CONSOLE_SSH_HOST = CONSOLE_SERVIDOR_IP
+CONSOLE_SSH_USUARIO = "console-ssh"
+CONSOLE_SSH_CHAVE = os.environ.get("CONSOLE_SSH_CHAVE", str(Path.home() / ".console-n2" / "id_ed25519"))
+CONSOLE_SSH_KNOWN_HOSTS = os.environ.get("CONSOLE_SSH_KNOWN_HOSTS", str(Path.home() / ".console-n2" / "known_hosts"))

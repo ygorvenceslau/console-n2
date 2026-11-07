@@ -1,0 +1,22 @@
+#!/bin/bash
+# Operação predefinida do Console N2: consultar ou alterar o hostname estático.
+# Única ação administrativa liberada no sudo para a conta console-ssh.
+set -euo pipefail
+case "${1:-}" in
+  get)
+    /usr/bin/hostnamectl --static
+    ;;
+  set)
+    novo="${2:-}"
+    if [[ ! "$novo" =~ ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$ ]]; then
+      echo "ERRO: nome inválido (use letras minúsculas, números e hífen; até 63 caracteres)" >&2
+      exit 2
+    fi
+    /usr/bin/hostnamectl set-hostname "$novo"
+    /usr/bin/hostnamectl --static
+    ;;
+  *)
+    echo "uso: console-hostname get | set <nome>" >&2
+    exit 2
+    ;;
+esac

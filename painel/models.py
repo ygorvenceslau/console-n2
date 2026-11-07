@@ -18,3 +18,26 @@ class ContaCorreio(models.Model):
 
     def __str__(self):
         return self.endereco
+
+
+class EstadoHostname(models.Model):
+    """Guarda o hostname original antes de uma alteração temporária pelo console."""
+    original = models.CharField(max_length=63, blank=True)
+    valor_teste = models.CharField(max_length=63, blank=True)
+    alterado_por = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                     on_delete=models.SET_NULL, related_name="+")
+    alterado_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "estado do hostname"
+        verbose_name_plural = "estado do hostname"
+
+    @classmethod
+    def atual(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @property
+    def pendente(self):
+        """True quando há uma alteração ainda não restaurada."""
+        return bool(self.original)
