@@ -14,4 +14,5 @@ urlpatterns = [
     path("email/", views.email, name="email"),
     path("ssh/", views.ssh, name="ssh"),
     path("logs/", views.logs, name="logs"),
+    path("api/metricas/", views.api_metricas, name="api_metricas"),
 ]

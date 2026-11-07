@@ -144,3 +144,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CONSOLE_SERVIDOR_NOME = "Debian"
 CONSOLE_SERVIDOR_IP = os.environ.get("CONSOLE_SERVIDOR_IP", "192.168.100.10")
+
+CONSOLE_SITE_URL = os.environ.get("CONSOLE_SITE_URL", "http://site.empresa.test/")
+CONSOLE_DISCOS = ["/", "/srv/portal/arquivos"]
+CONSOLE_INTERVALO_METRICAS_S = 5   # intervalo de atualização do painel (segundos)

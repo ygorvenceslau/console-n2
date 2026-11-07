@@ -22,3 +22,22 @@ arquivos = _em_construcao("arquivos", "Arquivos (FTP)", 4)
 email = _em_construcao("email", "E-mail", 5)
 ssh = _em_construcao("ssh", "Acesso SSH", 6)
 logs = _em_construcao("logs", "Logs técnicos", 7)
+
+
+# ---------- Etapa 3: métricas ----------
+import logging
+
+from django.http import JsonResponse
+
+from .integracoes.metricas import coletar_tudo
+
+logger = logging.getLogger(__name__)
+
+
+@perfil_requerido(*TODOS)
+def api_metricas(request):
+    try:
+        return JsonResponse({"ok": True, **coletar_tudo()})
+    except Exception:
+        logger.exception("Falha na coleta de métricas")
+        return JsonResponse({"ok": False, "erro": "Falha ao coletar dados do servidor."}, status=503)
