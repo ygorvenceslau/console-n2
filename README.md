@@ -1,7 +1,8 @@
 # Console Integrado de Serviços — N2 (Parte 1)
 
 IFCE · Engenharia de Software · Redes de Computadores II · Prof. Matias
-Aluno: Ygor Venceslau
+
+**Aluno:** Ygor Venceslau
 
 Console web que centraliza a operação dos serviços configurados na N1 (Apache, vsftpd,
 Postfix, Dovecot e OpenSSH). Todas as operações usam os **protocolos reais**
@@ -235,3 +236,5 @@ administração ampliada de usuários, HTTPS no console e novos serviços empres
 ## Evidências
 
 A ficha de verificação com os testes e os prints fica em [`docs/ficha-verificacao.md`](docs/ficha-verificacao.md).
+
+O mockup navegável das telas e fluxos está em [`docs/mockup.html`](docs/mockup.html). O GitHub exibe o código do arquivo: para ver o protótipo, baixe-o e abra no navegador (funciona sem internet).
