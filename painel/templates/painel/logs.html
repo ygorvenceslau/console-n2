@@ -1,0 +1,63 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Logs técnicos{% endblock %}
+{% block conteudo %}
+<h1 class="h3">Logs técnicos</h1>
+<p class="text-muted small">Registros lidos no servidor {{ servidor_ip }}, somente leitura. Consulta sob demanda.
+  Termos como <code>password=</code> são mascarados.</p>
+
+<div class="card mb-3"><div class="card-body">
+  <form method="get" class="row g-2 align-items-end" novalidate>
+    <div class="col-12 col-md-4">
+      <label for="fonte" class="form-label">Serviço</label>
+      <select id="fonte" name="fonte" class="form-select" required>
+        <option value="">Selecione…</option>
+        {% for chave, f in fontes %}
+          <option value="{{ chave }}" {% if chave == fonte %}selected{% endif %}>{{ f.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label for="linhas" class="form-label">Linhas</label>
+      <select id="linhas" name="linhas" class="form-select">
+        {% for n in opcoes_linhas %}<option value="{{ n }}" {% if n == linhas %}selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="periodo" class="form-label">Período</label>
+      <select id="periodo" name="periodo" class="form-select" aria-describedby="ajuda-periodo">
+        {% for chave, rotulo in periodos %}<option value="{{ chave }}" {% if chave == periodo %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label for="busca" class="form-label">Contém o texto</label>
+      <input type="text" id="busca" name="busca" maxlength="50" class="form-control" value="{{ busca }}" placeholder="ex.: Failed">
+    </div>
+    <div class="col-12">
+      <div id="ajuda-periodo" class="form-text">O período vale para os registros do journal; nos arquivos de log são exibidas as últimas linhas.</div>
+      <button class="btn btn-primary mt-2" type="submit">🔍 Consultar</button>
+    </div>
+  </form>
+</div></div>
+
+{% if erro %}
+  <div class="alert alert-danger" role="alert">✖ {{ erro }}</div>
+{% elif resultado %}
+  <div class="card"><div class="card-body">
+    <div class="d-flex flex-wrap gap-2 small text-muted mb-2">
+      <span>Origem: <code>{{ resultado.origem }}</code></span>
+      <span>· {{ resultado.exibidas }} de {{ resultado.total }} linha(s) encontrada(s)</span>
+      <span>· consultado em {{ resultado.instante }}</span>
+      {% if not resultado.periodo_aplicado %}<span>· período não se aplica a arquivos</span>{% endif %}
+    </div>
+    {% if resultado.linhas %}
+      <pre class="border rounded p-2 bg-dark text-light small mb-1" style="max-height:520px; overflow:auto; white-space:pre-wrap">{% for l in resultado.linhas %}{% if l.alerta %}<span class="text-warning">⚠ {{ l.texto }}</span>{% else %}{{ l.texto }}{% endif %}
+{% endfor %}</pre>
+      <div class="small text-muted">⚠ = linha com termo de erro, falha ou recusa.</div>
+    {% else %}
+      <div class="alert alert-secondary mb-0" role="status">Nenhuma linha encontrada com esses filtros.</div>
+    {% endif %}
+  </div></div>
+{% else %}
+  <div class="alert alert-info" role="status">Selecione um serviço e clique em Consultar.</div>
+{% endif %}
+{% endblock %}

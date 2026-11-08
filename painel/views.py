@@ -18,7 +18,6 @@ def _em_construcao(nome, titulo, etapa):
 
 
 servicos = _em_construcao("servicos", "Serviços", 3)
-logs = _em_construcao("logs", "Logs técnicos", 7)
 
 
 # ---------- Etapa 3: métricas ----------
@@ -371,3 +370,33 @@ def ssh_restaurar(request):
     else:
         messages.error(request, f"✖ O servidor informou '{r['atual']}'. O original continua guardado.")
     return redirect("ssh")
+
+
+# ---------- Etapa 7: logs técnicos ----------
+from .integracoes import logs as logs_int
+
+
+@perfil_requerido(*TODOS)
+def logs(request):
+    fonte = request.GET.get("fonte", "")
+    periodo = request.GET.get("periodo", "1h")
+    busca = request.GET.get("busca", "")
+    try:
+        linhas = int(request.GET.get("linhas", 50))
+    except ValueError:
+        linhas = 50
+    ctx = {
+        "pagina": "logs", "fontes": logs_int.FONTES.items(), "opcoes_linhas": logs_int.LINHAS,
+        "periodos": [(k, v[0]) for k, v in logs_int.PERIODOS.items()],
+        "fonte": fonte, "linhas": linhas, "periodo": periodo, "busca": busca[:50],
+        "resultado": None, "erro": None,
+    }
+    if fonte:
+        try:
+            ctx["resultado"] = logs_int.consultar(fonte, linhas, periodo, busca)
+            operacoes.registrar(request, "Logs", f"Consulta: {logs_int.FONTES[fonte]['nome']}", "concluída",
+                                f"{ctx['resultado']['exibidas']} linhas")
+        except logs_int.ErroLogs as e:
+            ctx["erro"] = str(e)
+            operacoes.registrar(request, "Logs", f"Consulta: {fonte[:30]}", "falha", e)
+    return render(request, "painel/logs.html", ctx)
