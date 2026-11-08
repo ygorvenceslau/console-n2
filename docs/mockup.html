@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Console N2</title>
+<style>
+:root{
+  --verde:#14532d; --verde2:#166534; --verde-claro:#d1fae5; --acento:#4ade80;
+  --fundo:#f4f6f5; --card:#ffffff; --borda:#dee2e6; --texto:#1f2937; --suave:#6b7280;
+  --azul:#2563eb; --vermelho:#dc2626; --amarelo:#f59e0b; --roxo:#9333ea;
+  --ok-bg:#dcfce7; --ok-tx:#166534; --dev-bg:#fef3c7; --dev-tx:#92400e; --p2-bg:#ede9fe; --p2-tx:#5b21b6;
+  --fonte: system-ui, -apple-system, "Segoe UI", Ubuntu, Roboto, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--fonte);color:var(--texto);background:#e5e7eb;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+code{font-family:var(--mono);font-size:.85em;color:#be185d}
+
+/* ---------- barra do mockup (fora do app) ---------- */
+.mk-barra{position:sticky;top:0;z-index:50;background:#111827;color:#f9fafb;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.mk-barra h1{font-size:15px;margin:0 8px 0 0;font-weight:600}
+.mk-barra .sub{color:#9ca3af;font-size:12px}
+.mk-nav{display:flex;flex-wrap:wrap;gap:6px}
+.mk-nav button{background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:6px;padding:4px 10px;font-size:13px;cursor:pointer}
+.mk-nav button[aria-current="true"]{background:var(--acento);color:#052e16;border-color:var(--acento);font-weight:600}
+.legenda{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 9px;white-space:nowrap;vertical-align:middle}
+.tag.ok{background:var(--ok-bg);color:var(--ok-tx)}
+.tag.dev{background:var(--dev-bg);color:var(--dev-tx)}
+.tag.p2{background:var(--p2-bg);color:var(--p2-tx)}
+.aviso-mk{background:#fffbeb;color:#78350f;border-bottom:1px solid #fde68a;padding:6px 16px;font-size:12.5px}
+
+/* ---------- moldura do app ---------- */
+.tela{display:none}
+.tela.ativa{display:block}
+.app{display:flex;min-height:calc(100vh - 90px);background:var(--fundo)}
+.sidebar{width:230px;background:var(--verde);color:#fff;padding:16px 12px;flex-shrink:0}
+.marca{font-weight:700;font-size:17px;margin:0 10px 18px}
+.marca small{display:block;font-weight:400;opacity:.75;font-size:12px}
+.sidebar a{display:block;color:var(--verde-claro);text-decoration:none;padding:8px 12px;border-radius:6px;margin-bottom:2px;cursor:pointer}
+.sidebar a:hover,.sidebar a.ativo{background:var(--verde2);color:#fff}
+.sidebar a.ativo{border-left:4px solid var(--acento);font-weight:600}
+.sep{margin:18px 12px 6px;font-size:11px;text-transform:uppercase;opacity:.6}
+.desativado{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;opacity:.7;font-size:14px;cursor:pointer;border-radius:6px}
+.desativado:hover{background:rgba(255,255,255,.08)}
+.conteudo{flex:1;min-width:0;display:flex;flex-direction:column}
+.topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;padding:12px 16px;border-bottom:1px solid var(--borda)}
+.servidor{margin-left:auto;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:6px;padding:3px 10px;font-size:14px}
+.btn{display:inline-block;border:1px solid transparent;border-radius:6px;padding:6px 12px;font-size:14px;cursor:pointer;background:#fff;text-decoration:none}
+.btn-sm{padding:3px 9px;font-size:13px}
+.btn-verde{background:#198754;color:#fff}
+.btn-azul{background:#0d6efd;color:#fff}
+.btn-cont{border-color:#adb5bd;color:#495057;background:#fff}
+.btn-cont-azul{border-color:#0d6efd;color:#0d6efd}
+.btn-cont-verde{border-color:#198754;color:#198754}
+.btn-cont-verm{border-color:var(--vermelho);color:var(--vermelho)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+main{padding:22px}
+h2.titulo{font-size:26px;font-weight:500;margin:0}
+.muted{color:var(--suave)}
+.small{font-size:13px}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:8px;padding:16px;margin-bottom:16px}
+.card h3{font-size:15px;font-weight:600;margin:0 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.grid-meio{display:grid;grid-template-columns:5fr 7fr;gap:14px}
+.metrica .rot{font-size:13px;color:var(--suave)}
+.metrica .val{font-size:24px;font-weight:600;margin:2px 0 6px}
+.barra{height:6px;background:#e9ecef;border-radius:3px;overflow:hidden}
+.barra span{display:block;height:100%}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;padding:8px 6px;border-bottom:1px solid var(--borda)}
+td{padding:8px 6px;border-bottom:1px solid #eef0f2;vertical-align:middle}
+.badge{display:inline-block;font-size:12px;font-weight:600;border-radius:5px;padding:2px 7px}
+.b-ok{background:#198754;color:#fff}
+.b-desc{background:#ffc107;color:#212529}
+.b-falha{background:var(--vermelho);color:#fff}
+.b-cinza{background:#f1f3f5;color:#212529;border:1px solid var(--borda)}
+.alerta{border-radius:7px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.a-ok{background:#d1e7dd;color:#0a3622;border:1px solid #a3cfbb}
+.a-erro{background:#f8d7da;color:#58151c;border:1px solid #f1aeb5}
+.a-aviso{background:#fff3cd;color:#664d03;border:1px solid #ffe69c}
+.a-info{background:#cff4fc;color:#055160;border:1px solid #9eeaf9}
+.a-cinza{background:#e2e3e5;color:#2b2f32;border:1px solid #c4c8cb}
+label{display:block;font-size:14px;margin:0 0 4px}
+.campo{width:100%;border:1px solid #ced4da;border-radius:6px;padding:7px 10px;background:#fff}
+.campo.invalido{border-color:var(--vermelho)}
+.erro-campo{color:var(--vermelho);font-size:13px;margin-top:4px}
+.ajuda{color:var(--suave);font-size:12.5px;margin-top:4px}
+.form-linha{display:grid;grid-template-columns:4fr 2fr 3fr 3fr;gap:10px;align-items:end}
+.abas{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--borda);margin-bottom:14px}
+.abas a{padding:8px 14px;border:1px solid transparent;border-radius:6px 6px 0 0;color:#0d6efd;cursor:pointer;text-decoration:none}
+.abas a.ativo{background:#fff;border-color:var(--borda);border-bottom-color:#fff;color:#212529;margin-bottom:-1px}
+.lista-msg a{display:block;padding:10px 14px;border-bottom:1px solid #eef0f2;color:inherit;text-decoration:none;cursor:pointer}
+.lista-msg a.sel{background:#0d6efd;color:#fff}
+.lista-msg .linha1{display:flex;justify-content:space-between;gap:8px}
+pre.log{background:#212529;color:#f8f9fa;border-radius:6px;padding:10px;font-family:var(--mono);font-size:12.5px;white-space:pre-wrap;margin:0;max-height:300px;overflow:auto}
+pre.log .w{color:#ffc107}
+pre.corpo{background:#f8f9fa;border:1px solid var(--borda);border-radius:6px;padding:12px;white-space:pre-wrap;font-family:inherit;margin:10px 0}
+dl.pares{display:grid;grid-template-columns:150px 1fr;gap:6px 10px;margin:0;font-size:14px}
+dl.pares dt{font-weight:600}
+dl.pares dd{margin:0}
+.nota{border:2px dashed #94a3b8;border-radius:8px;padding:10px 12px;background:#f8fafc;font-size:13px;color:#334155;margin-bottom:14px}
+.nota strong{color:#0f172a}
+.toast{position:absolute;right:18px;bottom:18px;min-width:260px;border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.t-ok{background:#198754}.t-erro{background:var(--vermelho)}
+.relativo{position:relative}
+.desbotado td{opacity:.5}
+.p2-bloco{border:2px dashed #a78bfa;background:#faf5ff}
+
+/* ---------- login ---------- */
+.login-fundo{min-height:calc(100vh - 90px);background:var(--verde);display:flex;align-items:center;justify-content:center;padding:16px;flex-direction:column;gap:16px}
+.login-caixa{background:#fff;border-radius:12px;padding:30px;width:100%;max-width:380px}
+.estados{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.estados button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:4px 10px;font-size:13px;cursor:pointer}
+.estados button[aria-pressed="true"]{background:#fff;color:var(--verde);font-weight:600}
+
+/* ---------- fluxos ---------- */
+.fluxos{padding:22px;max-width:1150px;margin:0 auto}
+.fluxo{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:16px;margin-bottom:16px}
+.fluxo h3{margin:0 0 10px;font-size:16px}
+.passos{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px}
+.passo{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:13px;min-width:120px;max-width:200px}
+.passo b{display:block;font-size:13px}
+.passo.erro{background:#fef2f2;border-color:#fecaca}
+.passo.okf{background:#f0fdf4;border-color:#bbf7d0}
+.seta{align-self:center;color:#64748b;font-weight:700}
+.ramo{margin-top:8px;font-size:13px;color:#475569}
+
+@media (max-width:900px){
+  .grid4{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid-meio{grid-template-columns:1fr}
+  .form-linha{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  .sidebar{display:none}
+  .grid4{grid-template-columns:1fr}
+  .form-linha{grid-template-columns:1fr}
+  dl.pares{grid-template-columns:1fr}
+  .legenda{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div class="mk-barra">
+  <h1>Mockup · Console integrado de serviços <span class="sub">IFCE · Redes II · N2 · Ygor Venceslau</span></h1>
+  <nav class="mk-nav" aria-label="Telas do mockup">
+    <button data-ir="fluxos">Fluxos</button>
+    <button data-ir="login">1 Login</button>
+    <button data-ir="visao">2 Visão geral</button>
+    <button data-ir="arquivos">3 Arquivos/FTP</button>
+    <button data-ir="email">4 E-mail</button>
+    <button data-ir="ssh">5 SSH</button>
+    <button data-ir="logs">6 Logs</button>
+    <button data-ir="parte2">Parte 2</button>
+  </nav>
+  <div class="legenda" aria-label="Legenda">
+    <span class="tag ok">✔ Funciona (Parte 1)</span>
+    <span class="tag dev">◐ Em desenvolvimento</span>
+    <span class="tag p2">◇ Previsto · Parte 2</span>
+  </div>
+</div>
+<div class="aviso-mk">Mockup de referência navegável · <strong>dados ilustrativos</strong> · clique no menu lateral ou nos botões acima. As telas reais e as evidências estão em <code>docs/ficha-verificacao.md</code>.</div>
+
+<!-- ======================= FLUXOS ======================= -->
+<section class="tela" id="t-fluxos">
+<div class="fluxos">
+  <div class="nota"><strong>Fluxo de navegação.</strong> Todas as telas exigem login. O menu lateral leva às páginas dedicadas (Visão geral, Serviços/HTTP, Arquivos, E-mail, SSH e Logs), e a barra superior mantém o servidor selecionado visível. As permissões são verificadas no backend: acessar uma rota sem permissão retorna 403.</div>
+
+  <div class="fluxo">
+    <h3>Acesso e sessão <span class="tag ok">✔ Funciona</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Login</b>usuário + senha</div><span class="seta">→</span>
+      <div class="passo okf"><b>Credenciais válidas</b>sessão criada · perfil carregado</div><span class="seta">→</span>
+      <div class="passo"><b>Visão geral</b>menu, servidor e usuário visíveis</div><span class="seta">→</span>
+      <div class="passo"><b>Sair</b>encerra a sessão</div>
+    </div>
+    <div class="ramo">↳ Credenciais inválidas → volta ao login com <em>"Usuário ou senha inválidos"</em> · Sessão expirada (30 min sem uso) → login com <em>"Sua sessão expirou"</em> · Usuário sem perfil → 403.</div>
+  </div>
+
+  <div class="fluxo">
+    <h3>Acompanhamento <span class="tag ok">✔ Funciona</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Polling a cada 5 s</b><code>/api/metricas/</code></div><span class="seta">→</span>
+      <div class="passo okf"><b>Sucesso</b>cartões, gráficos, serviços e operações atualizados</div><span class="seta">→</span>
+      <div class="passo erro"><b>Falha de comunicação</b>toast vermelho · serviços "Desconhecido"</div><span class="seta">→</span>
+      <div class="passo erro"><b>15 s sem coleta</b>aviso "dados desatualizados" com horário da última coleta</div><span class="seta">→</span>
+      <div class="passo okf"><b>Reconexão</b>toast verde · estado real</div>
+    </div>
+  </div>
+
+  <div class="fluxo">
+    <h3>Arquivos (FTP) <span class="tag ok">✔ Funciona</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Selecionar arquivo</b>validação de nome, tipo e tamanho</div><span class="seta">→</span>
+      <div class="passo"><b>Upload ao console</b>barra de progresso</div><span class="seta">→</span>
+      <div class="passo"><b>Backend → vsftpd</b><code>STOR</code> via ftplib</div><span class="seta">→</span>
+      <div class="passo"><b>Verificação</b>SHA-256 enviado × FTP (<code>RETR</code>) × HTTP</div><span class="seta">→</span>
+      <div class="passo okf"><b>Resultado</b>226 + hashes + link da publicação</div>
+    </div>
+    <div class="ramo">↳ Nome/tipo inválido → erro junto ao campo · arquivo já existente → recusado · perfil leitor → sem formulário e 403 na rota.</div>
+  </div>
+
+  <div class="fluxo">
+    <h3>E-mail (SMTP + IMAP) <span class="tag ok">✔ Funciona</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Selecionar conta autorizada</b>verificada no backend</div><span class="seta">→</span>
+      <div class="passo"><b>Compor / Responder</b>remetente fixo = conta</div><span class="seta">→</span>
+      <div class="passo"><b>1. SMTP</b>Postfix: 250 queued</div><span class="seta">→</span>
+      <div class="passo"><b>2. IMAP APPEND</b>cópia em <code>Sent</code></div><span class="seta">→</span>
+      <div class="passo okf"><b>Enviados</b>persistente após nova sessão</div>
+    </div>
+    <div class="ramo">↳ Falha no SMTP → "Mensagem NÃO enviada" · SMTP ok + falha na cópia → aviso "enviada, cópia não salva" e botão <em>Salvar cópia (sem reenviar)</em>.</div>
+  </div>
+
+  <div class="fluxo">
+    <h3>SSH e hostname reversível <span class="tag ok">✔ Funciona</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Consulta SSH</b>conta <code>console-ssh</code> · known_hosts</div><span class="seta">→</span>
+      <div class="passo"><b>Novo nome</b>validado (a-z, 0-9, hífen)</div><span class="seta">→</span>
+      <div class="passo"><b>Confirmação</b>diálogo</div><span class="seta">→</span>
+      <div class="passo"><b>Operação predefinida</b>sudo só para <code>console-hostname</code></div><span class="seta">→</span>
+      <div class="passo okf"><b>Pendente</b>original guardado no banco</div><span class="seta">→</span>
+      <div class="passo okf"><b>Restaurar</b>volta ao original e confirma</div>
+    </div>
+  </div>
+
+  <div class="fluxo p2-bloco">
+    <h3>Parte 2 <span class="tag p2">◇ Previsto</span></h3>
+    <div class="passos">
+      <div class="passo"><b>Auditoria persistente</b>usuário · ação · recurso · resultado · instante</div>
+      <div class="passo"><b>Iniciar / parar / reiniciar</b>serviços</div>
+      <div class="passo"><b>Edição de configurações</b></div>
+      <div class="passo"><b>Administração de usuários</b>ampliada</div>
+      <div class="passo"><b>Novos serviços</b>(pelo menos dois)</div>
+      <div class="passo"><b>HTTPS no console</b><span class="tag dev">◐ em desenvolvimento</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= LOGIN ======================= -->
+<section class="tela" id="t-login">
+  <div class="login-fundo">
+    <div class="estados" role="group" aria-label="Estados da tela de login">
+      <button data-login="normal" aria-pressed="true">Estado normal</button>
+      <button data-login="invalido" aria-pressed="false">Credencial inválida</button>
+      <button data-login="expirada" aria-pressed="false">Sessão expirada</button>
+    </div>
+    <div class="login-caixa">
+      <div style="margin-bottom:6px"><span class="tag ok">✔ Funciona</span></div>
+      <h2 style="font-size:21px;margin:0 0 2px;font-weight:600">Console integrado de serviços</h2>
+      <p class="muted" style="margin:0 0 18px">IFCE · Redes II · N2</p>
+      <div id="login-msg-inv" class="alerta a-erro" role="alert" hidden>⚠ Usuário ou senha inválidos.</div>
+      <div id="login-msg-exp" class="alerta a-aviso" role="alert" hidden>⏱ Sua sessão expirou ou esta página exige login. Entre novamente.</div>
+      <label for="lg-u">Usuário</label>
+      <input id="lg-u" class="campo" value="admin">
+      <label for="lg-s" style="margin-top:12px">Senha</label>
+      <input id="lg-s" class="campo" type="password" value="••••••••">
+      <button class="btn btn-verde" style="width:100%;margin-top:20px" data-ir="visao">Entrar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= APP (telas internas) ======================= -->
+<template id="tpl-moldura">
+  <div class="app">
+    <nav class="sidebar" aria-label="Menu principal">
+      <div class="marca">Console de Serviços<small>IFCE · Redes II · N2</small></div>
+      <a data-ir="visao" data-menu="visao">Visão geral</a>
+      <a data-ir="servicos" data-menu="servicos">Serviços</a>
+      <a data-ir="arquivos" data-menu="arquivos">Arquivos (FTP)</a>
+      <a data-ir="email" data-menu="email">E-mail</a>
+      <a data-ir="ssh" data-menu="ssh">Acesso SSH</a>
+      <a data-ir="logs" data-menu="logs">Logs técnicos</a>
+      <div class="sep">Previsto</div>
+      <div class="desativado" data-ir="parte2">Auditoria <span class="tag p2">◇ P2</span></div>
+      <div class="desativado" data-ir="parte2">Novos serviços <span class="tag p2">◇ P2</span></div>
+    </nav>
+    <div class="conteudo">
+      <header class="topo">
+        <strong>Console integrado de serviços</strong>
+        <span class="servidor">🖥 Debian · 192.168.100.10</span>
+        <span>👤 admin <span class="muted small">(administrador)</span></span>
+        <button class="btn btn-sm btn-cont-verm" data-ir="login">Sair</button>
+      </header>
+      <main class="relativo"></main>
+    </div>
+  </div>
+</template>
+
+<!-- Visão geral -->
+<template id="c-visao">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+    <div>
+      <h2 class="titulo">Visão geral do servidor <span class="tag ok">✔ Funciona</span></h2>
+      <div class="small muted" role="status">● Conectado · última coleta às 18:09:55 (há 3 s) · atualização a cada 5 s</div>
+    </div>
+    <button class="btn btn-sm btn-cont" style="margin-left:auto">⟳ Atualizar agora</button>
+  </div>
+  <div class="grid4">
+    <div class="card metrica"><div class="rot">CPU</div><div class="val">2,1 %</div><div class="barra"><span style="width:3%;background:#0d6efd"></span></div><div class="small muted" style="margin-top:6px">média de todos os núcleos (janela de 0,5 s)</div></div>
+    <div class="card metrica"><div class="rot">Memória (usada / total)</div><div class="val">0,35 / 1,93 GB</div><div class="barra"><span style="width:18%;background:#198754"></span></div><div class="small muted" style="margin-top:6px">Disponível: 1616 MB · 18,1 % em uso</div></div>
+    <div class="card metrica"><div class="rot">Disco</div><div class="val">1,7 / 18,5 GB</div><div class="barra"><span style="width:9.5%;background:#0dcaf0"></span></div><div class="small muted" style="margin-top:6px">/ (9,5 %) · /srv/portal/arquivos (9,5 %)</div></div>
+    <div class="card metrica"><div class="rot">Uptime</div><div class="val">7 h 11 min</div><div class="small muted">Host: localhost (192.168.100.10)</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>CPU e memória (%) <span class="muted small" style="font-weight:400">— amostras reais da sessão</span></h3>
+      <svg viewBox="0 0 600 180" width="100%" role="img" aria-label="Gráfico ilustrativo de CPU e memória">
+        <g stroke="#e5e7eb"><line x1="40" y1="20" x2="590" y2="20"/><line x1="40" y1="60" x2="590" y2="60"/><line x1="40" y1="100" x2="590" y2="100"/><line x1="40" y1="140" x2="590" y2="140"/></g>
+        <g font-size="10" fill="#6b7280"><text x="6" y="24">100%</text><text x="12" y="64">66%</text><text x="12" y="104">33%</text><text x="18" y="144">0%</text></g>
+        <polyline fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 3" points="40,113 100,113 160,112 220,113 280,113 340,112 400,113 460,113 520,112 590,113"/>
+        <polyline fill="none" stroke="#2563eb" stroke-width="2" points="40,138 100,136 160,139 220,137 280,138 340,135 400,138 460,137 520,136 590,138"/>
+        <g font-size="10" fill="#6b7280"><text x="40" y="165">18:08:40</text><text x="270" y="165">18:09:18</text><text x="540" y="165">18:09:55</text></g>
+      </svg>
+      <div class="small muted">■ CPU % &nbsp; ┄ Memória % &nbsp;· últimas 60 amostras (5 min)</div>
+    </div>
+    <div class="card">
+      <h3>Latência HTTP</h3>
+      <div class="val" style="font-size:24px;font-weight:600">1,6 ms</div>
+      <div class="small muted">HTTP 200 · 08/11/2026 18:09:55 · medido no backend no Debian</div>
+      <svg viewBox="0 0 300 120" width="100%" role="img" aria-label="Gráfico ilustrativo de latência HTTP">
+        <polyline fill="none" stroke="#9333ea" stroke-width="2" points="10,60 40,64 70,63 100,62 130,95 160,58 190,62 220,100 250,55 290,50"/>
+      </svg>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Estado dos serviços</h3>
+    <table>
+      <thead><tr><th>Serviço</th><th>Estado (systemd)</th><th>Porta</th><th>Teste de porta</th></tr></thead>
+      <tbody>
+        <tr><td>Apache · HTTP<div class="small muted">apache2</div></td><td><span class="badge b-ok">● Ativo</span> <span class="small muted">active (running)</span></td><td>80</td><td>✔ aberta <span class="small muted">(0,4 ms · 18:09:55)</span></td></tr>
+        <tr><td>vsftpd · FTP<div class="small muted">vsftpd</div></td><td><span class="badge b-ok">● Ativo</span> <span class="small muted">active (running)</span></td><td>21</td><td>✔ aberta <span class="small muted">(0,7 ms)</span></td></tr>
+        <tr><td>Postfix · SMTP<div class="small muted">postfix</div></td><td><span class="badge b-ok">● Ativo</span> <span class="small muted">active (running)</span></td><td>25</td><td>✔ aberta <span class="small muted">(1,1 ms)</span></td></tr>
+        <tr><td>Dovecot · IMAP<div class="small muted">dovecot</div></td><td><span class="badge b-ok">● Ativo</span> <span class="small muted">active (running)</span></td><td>143</td><td>✔ aberta <span class="small muted">(3,3 ms)</span></td></tr>
+        <tr class="desbotado"><td>OpenSSH · SSH<div class="small muted">ssh</div></td><td><span class="badge b-desc">? Desconhecido</span> <span class="small muted">exemplo: estado na perda de comunicação</span></td><td>22</td><td>— última leitura</td></tr>
+      </tbody>
+    </table>
+    <div class="small muted" style="margin-top:6px">Estados possíveis: ● Ativo · ○ Inativo · ✖ Falha · ? Desconhecido (não dependem só da cor).</div>
+  </div>
+  <div class="card">
+    <h3>Operações recentes da sessão <span class="muted small" style="font-weight:400">— FTP, e-mail, SSH, HTTP e logs</span></h3>
+    <table>
+      <thead><tr><th>Hora</th><th>Módulo</th><th>Operação</th><th>Situação</th></tr></thead>
+      <tbody>
+        <tr><td class="small">18:32:10</td><td><span class="badge b-cinza">FTP</span></td><td class="small">Envio de evidencia-n2.txt (44 bytes)<div class="muted">226 Transfer complete.</div></td><td><span class="badge b-ok">✔ concluída</span></td></tr>
+        <tr><td class="small">18:30:02</td><td><span class="badge b-cinza">SMTP</span></td><td class="small">Envio de aluno@ para suporte@<div class="muted">tempo esgotado (exemplo)</div></td><td><span class="badge b-falha">✖ falha</span></td></tr>
+        <tr><td class="small">—</td><td><span class="badge b-cinza">FTP</span></td><td class="small">Transferência em curso</td><td><span class="badge" style="background:#0dcaf0">⏳ em andamento</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="toast t-erro" role="alert">✖ Perda de comunicação com o servidor (exemplo de notificação)</div>
+</template>
+
+<!-- Serviços / HTTP -->
+<template id="c-servicos">
+  <h2 class="titulo">Serviços <span class="tag ok">✔ Funciona</span></h2>
+  <p class="small muted">Estado consultado no systemd do servidor e teste de conexão em cada porta.</p>
+  <div class="abas"><a class="ativo">🌐 HTTP</a><a data-ir="arquivos">📁 FTP</a><a data-ir="email">✉ E-mail</a><a data-ir="ssh">&gt;_ SSH</a></div>
+  <div class="card">
+    <h3>Controles do serviço <span class="tag p2">◇ Parte 2</span></h3>
+    <button class="btn btn-sm btn-cont" disabled>▶ Iniciar</button>
+    <button class="btn btn-sm btn-cont" disabled>■ Parar</button>
+    <button class="btn btn-sm btn-cont" disabled>⟳ Reiniciar</button>
+    <button class="btn btn-sm btn-cont" disabled>✎ Editar configuração</button>
+  </div>
+  <div class="card">
+    <h3>HTTP · Apache</h3>
+    <div class="alerta a-ok">✔ O site respondeu <strong>HTTP 200</strong> em <strong>6,5 ms</strong>.</div>
+    <dl class="pares">
+      <dt>URL testada</dt><dd><code>http://site.empresa.test/</code></dd>
+      <dt>Código HTTP</dt><dd>200</dd>
+      <dt>Duração</dt><dd>6,5 ms</dd>
+      <dt>Instante do teste</dt><dd>08/11/2026 19:48:37</dd>
+      <dt>Ponto de medição</dt><dd>backend no Debian</dd>
+    </dl>
+    <div style="margin-top:12px"><span class="btn btn-sm btn-azul">🌐 Abrir o site</span> <span class="btn btn-sm btn-cont-azul">📂 Arquivos publicados</span></div>
+    <div class="small muted" style="margin-top:10px">Comparação no cliente: <code>curl -w 'HTTP=%{http_code} total=%{time_total}s' http://site.empresa.test/</code></div>
+  </div>
+</template>
+
+<!-- Arquivos -->
+<template id="c-arquivos">
+  <h2 class="titulo">Arquivos (FTP) <span class="tag ok">✔ Funciona</span></h2>
+  <p class="small muted">Transferências pelo vsftpd em 192.168.100.10 (pasta <code>/arquivos</code>), publicadas em <u>http://site.empresa.test/arquivos/</u>.</p>
+  <div class="card">
+    <h3>Enviar arquivo</h3>
+    <label for="arq">Arquivo</label>
+    <input id="arq" class="campo invalido" value="relatorio final.pdf" aria-describedby="arq-erro">
+    <div class="erro-campo" id="arq-erro">Nome inválido: use apenas letras, números, ponto, hífen ou sublinhado.</div>
+    <div class="ajuda">Permitidos: .jpeg, .jpg, .pdf, .png, .txt · até 10 MB · nome sem espaços, acentos ou barras.</div>
+    <button class="btn btn-verde" style="margin-top:12px">⬆ Enviar via FTP</button>
+    <div style="margin-top:14px" role="status">
+      <div class="small">⏳ Transferindo ao vsftpd por FTP e verificando integridade…</div>
+      <div class="barra" style="height:10px;margin-top:4px"><span style="width:100%;background:repeating-linear-gradient(45deg,#198754 0 10px,#20a36a 10px 20px)"></span></div>
+    </div>
+    <div style="margin-top:12px" class="small"><strong>evidencia-n2.txt</strong> · 44 bytes enviados · 44 bytes no servidor · resposta do FTP: <code>226 Transfer complete.</code></div>
+    <div class="alerta a-ok" style="margin-top:8px">
+      <strong>✔ Integridade confirmada: os hashes coincidem.</strong>
+      <div class="small">Publicação HTTP: HTTP 200 · <u>http://site.empresa.test/arquivos/evidencia-n2.txt</u></div>
+      <table style="margin-top:6px;background:#fff"><tbody>
+        <tr><td class="small">SHA-256 do arquivo enviado</td><td><code>dd9268b1aacf…04000772</code></td></tr>
+        <tr><td class="small">SHA-256 recuperado por FTP</td><td><code>dd9268b1aacf…04000772</code></td></tr>
+        <tr><td class="small">SHA-256 publicado por HTTP</td><td><code>dd9268b1aacf…04000772</code></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Arquivos no servidor <span class="btn btn-sm btn-cont" style="margin-left:auto">⟳ Atualizar lista</span></h3>
+    <table>
+      <thead><tr><th>Nome</th><th>Tamanho</th><th>Modificado</th><th>Ações</th></tr></thead>
+      <tbody>
+        <tr><td>evidencia-n2.txt</td><td>44 bytes</td><td class="small">08/11/2026 21:32 UTC</td><td><span class="btn btn-sm btn-cont-azul">⬇ Baixar (FTP)</span> <span class="btn btn-sm btn-cont">🌐 Ver no site</span> <span class="btn btn-sm btn-cont-verde">✔ Verificar integridade</span></td></tr>
+        <tr><td>relatorio.pdf</td><td>24 bytes</td><td class="small">01/09/2026 22:16 UTC</td><td><span class="btn btn-sm btn-cont-azul">⬇ Baixar (FTP)</span> <span class="btn btn-sm btn-cont">🌐 Ver no site</span> <span class="btn btn-sm btn-cont-verde">✔ Verificar integridade</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="nota"><strong>Perfil leitor:</strong> o formulário de envio é substituído por "🔒 Seu perfil (leitor) permite apenas listar, baixar e verificar arquivos", e a rota de envio responde 403.</div>
+</template>
+
+<!-- E-mail -->
+<template id="c-email">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+    <h2 class="titulo">E-mail <span class="tag ok">✔ Funciona</span></h2>
+    <label for="conta" class="small muted" style="margin:0">Conta</label>
+    <select id="conta" class="campo" style="width:auto"><option>aluno@empresa.test</option><option>suporte@empresa.test</option></select>
+    <button class="btn btn-sm btn-verde" style="margin-left:auto" data-email="compor">✉ Nova mensagem</button>
+  </div>
+  <p class="small muted">Envio por SMTP (Postfix, porta 25) e consulta por IMAP (Dovecot, porta 143). As mensagens ficam guardadas no servidor.</p>
+  <div class="abas" role="tablist">
+    <a data-email="recebidas" class="ativo">📥 Recebidas</a>
+    <a data-email="enviados">📤 Enviados</a>
+    <a data-email="compor">✉ Compor</a>
+    <a data-email="falha">⚠ Falha na cópia</a>
+  </div>
+
+  <div data-painel="recebidas" class="grid-meio">
+    <div class="card" style="padding:0">
+      <div class="lista-msg">
+        <a class="sel"><div class="linha1"><strong>● Re: Teste N2 evidencia</strong><small>08 Nov 18:53</small></div><small>De: suporte@empresa.test</small></a>
+        <a><div class="linha1"><span>Re: Teste N2 navegador</span><small>07 Nov 15:03</small></div><small>De: suporte@empresa.test</small></a>
+        <a><div class="linha1"><span>Re: Teste N1</span><small>21 Out 17:36</small></div><small>De: Suporte &lt;suporte@empresa.test&gt;</small></a>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:18px;font-weight:500">Re: Teste N2 evidencia</h3>
+      <dl class="pares small"><dt>De</dt><dd>suporte@empresa.test</dd><dt>Para</dt><dd>aluno@empresa.test</dd><dt>Data</dt><dd>Sun, 08 Nov 2026 18:53:23 -0300</dd><dt>ID</dt><dd><code>&lt;1794…@empresa.test&gt;</code></dd></dl>
+      <pre class="corpo">Em Sun, 08 Nov 2026 18:51:16 -0300, aluno@empresa.test escreveu:
+&gt; evidencia
+
+Recebido, obrigado!</pre>
+      <span class="btn btn-sm btn-cont-azul" data-email="compor">↩ Responder</span>
+    </div>
+  </div>
+
+  <div data-painel="enviados" hidden>
+    <div class="alerta a-ok">✔ Mensagem enviada (SMTP: 250 2.0.0 Ok: queued as C94474004F) e cópia salva em Enviados.</div>
+    <div class="card" style="padding:0"><div class="lista-msg">
+      <a><div class="linha1"><span>Teste N2 evidencia</span><small>08 Nov 18:51</small></div><small>Para: suporte@empresa.test</small></a>
+      <a><div class="linha1"><span>Teste N2 navegador</span><small>07 Nov 15:01</small></div><small>Para: suporte@empresa.test</small></a>
+    </div></div>
+  </div>
+
+  <div data-painel="compor" hidden>
+    <div class="card">
+      <h3>✉ Nova mensagem / ↩ Responder</h3>
+      <label for="de">De</label><input id="de" class="campo" value="aluno@empresa.test" readonly><div class="ajuda">O remetente é sempre a conta selecionada.</div>
+      <label for="para" style="margin-top:12px">Para</label><input id="para" class="campo invalido" value="fulano@gmail.com" aria-describedby="para-erro"><div class="erro-campo" id="para-erro">Destinatário inválido. Use um endereço @empresa.test.</div>
+      <label for="ass" style="margin-top:12px">Assunto</label><input id="ass" class="campo" value="Teste N2 evidencia">
+      <label for="msg" style="margin-top:12px">Mensagem</label><textarea id="msg" class="campo" rows="5">Mensagem de teste para a ficha de verificação.</textarea>
+      <div style="margin-top:12px"><button class="btn btn-verde">➤ Enviar por SMTP</button> <button class="btn btn-cont">Cancelar</button></div>
+      <div class="small muted" style="margin-top:6px">Após o clique, o botão é desabilitado ("⏳ Enviando por SMTP e salvando a cópia…") para evitar envio duplicado.</div>
+    </div>
+  </div>
+
+  <div data-painel="falha" hidden>
+    <div class="alerta a-aviso">✔ Mensagem ENVIADA (SMTP: 250 Ok: queued as 7A1B…), mas a cópia em Enviados falhou. Não reenvie: use o botão abaixo.</div>
+    <div class="alerta a-aviso" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">⚠ A mensagem <strong>Relatório</strong> para suporte@empresa.test <strong>já foi enviada</strong>, mas a cópia não foi salva.
+      <button class="btn btn-sm" style="margin-left:auto;background:#ffc107">Salvar cópia em Enviados (sem reenviar)</button></div>
+    <div class="alerta a-erro">✖ Mensagem NÃO enviada. Falha de comunicação com o SMTP em 192.168.100.10:25. <span class="small">(estado distinto do anterior)</span></div>
+  </div>
+</template>
+
+<!-- SSH -->
+<template id="c-ssh">
+  <h2 class="titulo">Acesso SSH <span class="tag ok">✔ Funciona</span></h2>
+  <p class="small muted">Conexão SSH real do backend para 192.168.100.10:22 com a conta técnica <code>console-ssh</code> (somente chave; sudo limitado a uma operação predefinida).</p>
+  <div class="alerta a-ok">✔ Hostname alterado de 'localhost' para 'servidor-n2-teste' (confirmado no servidor). Valor original guardado: 'localhost'.</div>
+  <div class="grid-meio" style="grid-template-columns:1fr 1fr">
+    <div class="card">
+      <h3>Identificação do servidor</h3>
+      <dl class="pares small">
+        <dt>Usuário remoto</dt><dd><code>console-ssh</code></dd>
+        <dt>Hostname atual</dt><dd><strong>servidor-n2-teste</strong></dd>
+        <dt>Endereço</dt><dd>192.168.100.10:22</dd>
+        <dt>Sistema</dt><dd>Linux 6.12.94+deb13-amd64 x86_64</dd>
+        <dt>Uptime</dt><dd>up 4 hours, 45 minutes</dd>
+        <dt>Identidade</dt><dd>✔ verificada pelo known_hosts<br><code>ssh-ed25519 SHA256:VKpIFWm…eV4Js</code></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h3>Alterar nome do servidor <span class="muted small" style="font-weight:400">— temporário e reversível</span></h3>
+      <div class="alerta a-aviso small">⚠ Alteração pendente: o nome original <strong>localhost</strong> está guardado (alterado para <strong>servidor-n2-teste</strong> por admin em 08/11/2026 13:32:18).</div>
+      <p class="small">Valor atual: <strong>servidor-n2-teste</strong></p>
+      <label for="nn">Novo nome</label>
+      <input id="nn" class="campo invalido" value="Servidor_Teste!" aria-describedby="nn-erro">
+      <div class="erro-campo" id="nn-erro">Nome inválido. Use letras minúsculas, números e hífen (1 a 63 caracteres).</div>
+      <button class="btn btn-azul" style="margin-top:12px">Alterar hostname</button>
+      <div style="margin-top:10px"><button class="btn btn-cont-verde">↺ Restaurar valor original (localhost)</button></div>
+      <div class="small muted" style="margin-top:8px">Diálogo de confirmação antes de alterar e de restaurar.</div>
+    </div>
+  </div>
+  <div class="card p2-bloco">
+    <h3>Terminal interativo · edição livre de arquivos <span class="tag p2">◇ fora do escopo</span></h3>
+    <div class="small muted">Não exigidos na Parte 1; administração ampliada prevista para a Parte 2.</div>
+  </div>
+  <div class="nota"><strong>Perfis operador e leitor:</strong> veem a identificação; o formulário é substituído por "🔒 Somente o perfil administrador pode alterar o hostname".</div>
+</template>
+
+<!-- Logs -->
+<template id="c-logs">
+  <h2 class="titulo">Logs técnicos <span class="tag ok">✔ Funciona</span></h2>
+  <p class="small muted">Registros lidos no servidor, somente leitura, sob demanda. Termos como <code>password=</code> são mascarados.</p>
+  <div class="card">
+    <div class="form-linha">
+      <div><label for="lf">Serviço</label><select id="lf" class="campo"><option>OpenSSH · SSH</option><option>Apache · acessos HTTP</option><option>Apache · erros</option><option>vsftpd · serviço</option><option>vsftpd · transferências</option><option>Postfix · SMTP</option><option>Dovecot · IMAP</option></select></div>
+      <div><label for="ll">Linhas</label><select id="ll" class="campo"><option>20</option><option>50</option><option>100</option><option>200</option></select></div>
+      <div><label for="lp">Período</label><select id="lp" class="campo"><option>sem limite de tempo</option><option>últimos 10 minutos</option><option>última hora</option><option>últimas 24 horas</option></select></div>
+      <div><label for="lb">Contém o texto</label><input id="lb" class="campo" value="aluno"></div>
+    </div>
+    <div class="ajuda">O período vale para os registros do journal; nos arquivos de log são exibidas as últimas linhas.</div>
+    <button class="btn btn-azul" style="margin-top:10px">🔍 Consultar</button>
+  </div>
+  <div class="card">
+    <div class="small muted" style="margin-bottom:8px">Origem: <code>journalctl -u ssh</code> · 8 de 8 linha(s) encontrada(s) · consultado em 08/11/2026 19:23:57</div>
+<pre class="log"><span class="w">⚠ 2026-11-07T15:54:02 localhost sshd-session[4863]: User aluno from 192.168.100.10 not allowed because not listed in AllowUsers</span>
+<span class="w">⚠ 2026-11-07T15:54:06 localhost unix_chkpwd[4871]: password check failed for user (aluno)</span>
+<span class="w">⚠ 2026-11-07T15:54:08 localhost sshd-session[4863]: Failed password for invalid user aluno from 192.168.100.10 port 57706 ssh2</span>
+2026-11-08T14:13:04 localhost sshd-session[6784]: Accepted publickey for console-ssh from 192.168.100.10 port 46340 ssh2</pre>
+    <div class="small muted" style="margin-top:6px">⚠ = linha com termo de erro, falha ou recusa.</div>
+  </div>
+  <div class="alerta a-erro">✖ Exemplo de erro tratado: "O arquivo /var/log/mail.log não existe nesta instalação." · "Sem permissão para ler o journal…"</div>
+</template>
+
+<!-- Parte 2 -->
+<template id="c-parte2">
+  <h2 class="titulo">Parte 2 — evolução do console <span class="tag p2">◇ Previsto</span></h2>
+  <p class="small muted">Recursos indicados no mockup como previstos; não fazem parte da entrega da Parte 1.</p>
+  <div class="card p2-bloco">
+    <h3>Auditoria persistente <span class="tag p2">◇ Parte 2</span></h3>
+    <table>
+      <thead><tr><th>Instante</th><th>Usuário</th><th>Ação</th><th>Recurso</th><th>Resultado</th></tr></thead>
+      <tbody><tr><td class="small">08/11/2026 18:32:10</td><td>admin</td><td>Envio FTP</td><td>evidencia-n2.txt</td><td><span class="badge b-ok">✔ sucesso</span></td></tr>
+      <tr><td class="small">08/11/2026 19:16:12</td><td>admin</td><td>Alterar hostname</td><td>Debian</td><td><span class="badge b-ok">✔ sucesso</span></td></tr></tbody>
+    </table>
+    <div class="small muted" style="margin-top:6px">Filtros por usuário, período e resultado; exportação.</div>
+  </div>
+  <div class="card p2-bloco">
+    <h3>Administração ampliada <span class="tag p2">◇ Parte 2</span></h3>
+    <div class="small">Iniciar / parar / reiniciar serviços · edição de configurações · gestão de usuários e perfis (somente consulta, privilégio parcial, administrador) · alertas e séries históricas persistentes.</div>
+  </div>
+  <div class="card p2-bloco">
+    <h3>Novos serviços empresariais <span class="tag p2">◇ Parte 2</span></h3>
+    <div class="small">Pelo menos dois serviços novos integrados ao mesmo console.</div>
+  </div>
+  <div class="card">
+    <h3>Segurança incorporada <span class="tag dev">◐ Em desenvolvimento</span></h3>
+    <div class="small">HTTPS no console e execução como serviço do sistema com usuário dedicado.</div>
+  </div>
+</template>
+
+<section class="tela" id="t-app"></section>
+
+<script>
+(function () {
+  "use strict";
+  const internas = ["visao", "servicos", "arquivos", "email", "ssh", "logs", "parte2"];
+  const app = document.getElementById("t-app");
+
+  function mostrarLogin(estado) {
+    document.querySelectorAll("[data-login]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.login === estado)));
+    document.getElementById("login-msg-inv").hidden = estado !== "invalido";
+    document.getElementById("login-msg-exp").hidden = estado !== "expirada";
+  }
+
+  function emailPainel(nome) {
+    app.querySelectorAll("[data-painel]").forEach(p => { p.hidden = p.dataset.painel !== nome; });
+    app.querySelectorAll(".abas [data-email]").forEach(a => a.classList.toggle("ativo", a.dataset.email === nome));
+  }
+
+  function ir(tela) {
+    document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+    document.querySelectorAll(".mk-nav button").forEach(b => {
+      const marcado = b.dataset.ir === tela || (tela === "servicos" && b.dataset.ir === "visao");
+      b.setAttribute("aria-current", String(b.dataset.ir === tela));
+    });
+    if (internas.includes(tela)) {
+      app.innerHTML = "";
+      app.appendChild(document.getElementById("tpl-moldura").content.cloneNode(true));
+      app.querySelector("main").appendChild(document.getElementById("c-" + tela).content.cloneNode(true));
+      app.querySelectorAll("[data-menu]").forEach(a => a.classList.toggle("ativo", a.dataset.menu === tela));
+      app.classList.add("ativa");
+      if (tela === "email") emailPainel("recebidas");
+    } else {
+      document.getElementById("t-" + tela).classList.add("ativa");
+    }
+    try { history.replaceState(null, "", "#" + tela); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener("click", function (ev) {
+    const l = ev.target.closest("[data-login]");
+    if (l) { mostrarLogin(l.dataset.login); return; }
+    const e = ev.target.closest("[data-email]");
+    if (e) { emailPainel(e.dataset.email); return; }
+    const alvo = ev.target.closest("[data-ir]");
+    if (alvo) { ev.preventDefault(); ir(alvo.dataset.ir); }
+  });
+
+  const inicial = (location.hash || "#fluxos").slice(1);
+  ir(["fluxos", "login", ...internas].includes(inicial) ? inicial : "fluxos");
+})();
+</script>
+</body>
+</html>
