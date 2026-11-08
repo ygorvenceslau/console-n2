@@ -88,6 +88,7 @@
     $("d-http").textContent = (h.codigo ? "HTTP " + h.codigo : (h.erro || "sem resposta")) +
       " · " + h.instante + " · medido no " + h.ponto_medicao;
 
+    renderOperacoes(d.operacoes || []);
     const rotulo = d.coletado_em.slice(11);
     empurrar(gRec, rotulo, [s.cpu_percentual, s.memoria.percentual]);
     empurrar(gHttp, rotulo, [h.ok ? h.duracao_ms : null]);
@@ -99,6 +100,29 @@
         '<td><span class="badge text-bg-' + cor + '">' + txt + '</span> <span class="small text-muted">' + esc(sv.detalhe) + "</span></td>" +
         "<td>" + sv.porta + "</td>" +
         "<td>" + (tp.aberta ? "✔ aberta" : "✖ fechada") + ' <span class="small text-muted">(' + tp.duracao_ms + " ms · " + esc(tp.instante.slice(11)) + ")</span></td></tr>";
+    }).join("");
+  }
+
+  const SITUACAO = {
+    "concluída": ["success", "✔ concluída"],
+    "concluída com alerta": ["warning", "⚠ com alerta"],
+    "falha": ["danger", "✖ falha"],
+    "em andamento": ["info", "⏳ em andamento"],
+  };
+
+  function renderOperacoes(ops) {
+    const alvo = $("t-operacoes");
+    if (!alvo) return;
+    if (!ops.length) {
+      alvo.innerHTML = '<tr><td colspan="4" class="text-muted">Nenhuma operação nesta sessão ainda.</td></tr>';
+      return;
+    }
+    alvo.innerHTML = ops.map((o) => {
+      const [cor, txt] = SITUACAO[o.situacao] || ["secondary", esc(o.situacao)];
+      return '<tr><td class="small text-nowrap">' + esc(o.instante) + "</td>" +
+        '<td><span class="badge text-bg-light border">' + esc(o.modulo) + "</span></td>" +
+        '<td class="small">' + esc(o.descricao) + (o.detalhe ? '<div class="text-muted text-break">' + esc(o.detalhe) + "</div>" : "") + "</td>" +
+        '<td><span class="badge text-bg-' + cor + '">' + txt + "</span></td></tr>";
     }).join("");
   }
 

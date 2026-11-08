@@ -1,0 +1,68 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Serviços{% endblock %}
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+  <h1 class="h3 mb-0">Serviços</h1>
+  <a class="btn btn-sm btn-outline-secondary ms-auto" href="{% url 'servicos' %}">⟳ Testar novamente</a>
+</div>
+<p class="text-muted small">Estado consultado no systemd do servidor {{ servidor_ip }} e teste de conexão em cada porta.</p>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item"><a class="nav-link active" aria-current="page" href="#http">🌐 HTTP</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'arquivos' %}">📁 FTP</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'email' %}">✉ E-mail</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'ssh' %}">&gt;_ SSH</a></li>
+</ul>
+
+<div class="card mb-3"><div class="card-body">
+  <h2 class="h6">Estado dos serviços</h2>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Serviço</th><th>Estado (systemd)</th><th>Porta</th><th>Teste de porta</th><th></th></tr></thead>
+      <tbody>
+      {% for s in servicos %}
+        <tr>
+          <td>{{ s.nome }}<div class="small text-muted">{{ s.unidade }}</div></td>
+          <td>
+            {% if s.estado == "ativo" %}<span class="badge text-bg-success">● Ativo</span>
+            {% elif s.estado == "inativo" %}<span class="badge text-bg-secondary">○ Inativo</span>
+            {% elif s.estado == "falha" %}<span class="badge text-bg-danger">✖ Falha</span>
+            {% else %}<span class="badge text-bg-warning">? Desconhecido</span>{% endif %}
+            <span class="small text-muted">{{ s.detalhe }}</span>
+          </td>
+          <td>{{ s.porta }}</td>
+          <td>{% if s.teste_porta.aberta %}✔ aberta{% else %}✖ fechada{% endif %}
+            <span class="small text-muted">({{ s.teste_porta.duracao_ms }} ms · {{ s.teste_porta.instante|slice:"11:" }})</span></td>
+          <td><a class="btn btn-sm btn-outline-primary" href="{{ s.link }}">Abrir</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div></div>
+
+<div class="card" id="http"><div class="card-body">
+  <h2 class="h6">HTTP · Apache</h2>
+  {% if http.ok %}
+    <div class="alert alert-success" role="status">✔ O site respondeu <strong>HTTP {{ http.codigo }}</strong> em <strong>{{ http.duracao_ms }} ms</strong>.</div>
+  {% else %}
+    <div class="alert alert-danger" role="alert">✖ Falha no teste HTTP: {% if http.codigo %}HTTP {{ http.codigo }}{% else %}{{ http.erro }}{% endif %}</div>
+  {% endif %}
+  <dl class="row small">
+    <dt class="col-4 col-md-3">URL testada</dt><dd class="col-8 col-md-9"><code>{{ http.url }}</code></dd>
+    <dt class="col-4 col-md-3">Código HTTP</dt><dd class="col-8 col-md-9">{{ http.codigo|default:"—" }}</dd>
+    <dt class="col-4 col-md-3">Duração</dt><dd class="col-8 col-md-9">{% if http.duracao_ms %}{{ http.duracao_ms }} ms{% else %}—{% endif %}</dd>
+    <dt class="col-4 col-md-3">Instante do teste</dt><dd class="col-8 col-md-9">{{ http.instante }}</dd>
+    <dt class="col-4 col-md-3">Ponto de medição</dt><dd class="col-8 col-md-9">{{ http.ponto_medicao }}</dd>
+  </dl>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-sm btn-primary" href="{{ url_site }}" target="_blank" rel="noopener">🌐 Abrir o site</a>
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_arquivos }}" target="_blank" rel="noopener">📂 Arquivos publicados</a>
+  </div>
+  <div class="small text-muted">
+    Para comparar com a experiência do cliente, meça no Ubuntu:<br>
+    <code>curl --max-time 5 -sS -o /dev/null -w 'HTTP=%{http_code} total=%{time_total}s\n' {{ url_site }}</code><br>
+    A medida do console é feita no Debian (backend); a do curl, no Ubuntu (cliente).
+  </div>
+</div></div>
+{% endblock %}

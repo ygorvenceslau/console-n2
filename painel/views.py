@@ -17,7 +17,6 @@ def _em_construcao(nome, titulo, etapa):
     return view
 
 
-servicos = _em_construcao("servicos", "Serviços", 3)
 
 
 # ---------- Etapa 3: métricas ----------
@@ -33,7 +32,7 @@ logger = logging.getLogger(__name__)
 @perfil_requerido(*TODOS)
 def api_metricas(request):
     try:
-        return JsonResponse({"ok": True, **coletar_tudo()})
+        return JsonResponse({"ok": True, **coletar_tudo(), "operacoes": operacoes.listar(request)[:10]})
     except Exception:
         logger.exception("Falha na coleta de métricas")
         return JsonResponse({"ok": False, "erro": "Falha ao coletar dados do servidor."}, status=503)
@@ -400,3 +399,30 @@ def logs(request):
             ctx["erro"] = str(e)
             operacoes.registrar(request, "Logs", f"Consulta: {fonte[:30]}", "falha", e)
     return render(request, "painel/logs.html", ctx)
+
+
+# ---------- Etapa 7: página Serviços (estado + HTTP) ----------
+from .integracoes import metricas as metricas_int
+
+PAGINAS_SERVICO = {"apache2": "#http", "vsftpd": "arquivos", "postfix": "email", "dovecot": "email", "ssh": "ssh"}
+
+
+@perfil_requerido(*TODOS)
+def servicos(request):
+    ip = settings.CONSOLE_SERVIDOR_IP
+    lista = []
+    for unidade, nome, porta in metricas_int.SERVICOS:
+        item = {"unidade": unidade, "nome": nome, "porta": porta}
+        item.update(metricas_int.estado_servico(unidade))
+        item["teste_porta"] = metricas_int.porta_aberta(ip, porta)
+        destino = PAGINAS_SERVICO[unidade]
+        item["link"] = destino if destino.startswith("#") else reverse(destino)
+        lista.append(item)
+    http = metricas_int.testar_http()
+    operacoes.registrar(request, "HTTP", f"Teste HTTP de {http['url']}",
+                        "concluída" if http["ok"] else "falha",
+                        f"HTTP {http['codigo']} em {http['duracao_ms']} ms" if http["codigo"] else http.get("erro", ""))
+    return render(request, "painel/servicos.html", {
+        "pagina": "servicos", "servicos": lista, "http": http,
+        "url_site": settings.CONSOLE_SITE_URL, "url_arquivos": settings.CONSOLE_SITE_ARQUIVOS_URL,
+    })
